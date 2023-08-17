@@ -3,7 +3,7 @@ name: Docker Build and Push
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build_and_push:
@@ -24,4 +24,4 @@ jobs:
         access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         region: us-west-2
-        image: hbot-bot:v1, hbot-bot:latest
+        image: hbot-bot:v1, my-image:latest
