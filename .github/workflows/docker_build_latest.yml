@@ -1,38 +1,27 @@
-name: Docker Build Latest
+name: Docker Build and Push
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
-      - master
+      - main
 
 jobs:
-  docker:
+  build_and_push:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment: production
 
     steps:
-    - name: Check Out Repo 
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+    - name: Build Docker bot image
+      run: docker build --tag hbot-bot:v1 ./bot
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v1 
+    - name: Push to bot to ECR
+      id: ecr-bot
+      uses: jwalton/gh-ecr-push@v1
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build and push
-      id: docker_build
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./Dockerfile
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: hummingbot/hummingbot:latest
+        access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        region: us-west-2
+        image: hbot-bot:v1, hbot-bot:latest
